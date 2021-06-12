@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  ts-node-docker:
+    container_name: ts-node-docker
+    ports:
+      - "6000:6000"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./src:/demo/src
+      - ./nodemon.json:/demo/nodemon.json
+    command: npm run dev
+

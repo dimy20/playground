@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  ts-node-docker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production 
+    command: npm run start
