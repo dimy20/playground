@@ -17,6 +17,8 @@
 
 #define PORT "3490"  // the port users will be connecting to
 #define BACKLOG 10	 // how many pending connections queue will hold
+#define MAX_CLIENTS 5
+#define RW_FD 2
 
 
 
@@ -63,10 +65,17 @@ void *get_in_addr(struct sockaddr *sa)
 
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
+// test
+void send_to_parent(int write_fd, int data){
+    write(write_fd, &data, sizeof(int));
+}
 
 int main(void)
 {
+	int fd[MAX_CLIENTS][RW_FD];
+
 	
+
     int pipe_fd[2];
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
 	struct addrinfo hints, *servinfo, *p;
@@ -81,10 +90,7 @@ int main(void)
     cpid_t c;
     init(&c);
 
-    if(pipe(pipe_fd) == -1){
-        printf("error creating pipe");
-        return 1;
-    }
+    
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -142,7 +148,10 @@ int main(void)
 
 	printf("server: waiting for connections...\n");
 
-	while(c.len < 2) {  // main accept() loop
+	// index to keep track of pipes ends
+	int n = 0;
+
+	while(n < MAX_CLIENTS) {  // main accept() loop
 		sin_size = sizeof their_addr;
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
 		if (new_fd == -1) {
@@ -152,46 +161,57 @@ int main(void)
 
 
         struct sockaddr_in * addr = (struct sockaddr_in *)get_in_addr((struct sockaddr *)&their_addr);
-
         inet_ntop(their_addr.ss_family,addr,s,sizeof s);
-		
-
 		printf("server: got connection from %s\n", s);
+		
+		if(pipe(fd[n]) == -1){
+			printf("error ocurred creating the pipe");
+			exit(1);
+		}
 
 		if (!fork()) { // this is the child process
-            close(pipe_fd[0]);
-			close(sockfd); // child doesn't need the listener
 
-            int c_pid = getpid();
+			// child doesnt need the listener
+			close(sockfd);
+			// close read end for this child
+			close(fd[n][0]);
+			// close siblings pipes
+			for(int j =0; j<n;j++){
+				close(fd[j][0]);
+				close(fd[j][1]);
+			}
 
-            printf("new pid : %d \n", c_pid);
-            write(pipe_fd[1],&c_pid,sizeof(int));
+/*             int c_pid = getpid();
+            printf("new pid : %d \n", c_pid); */
+
+			send_to_parent(fd[n][1],n);
+
+			//socket stuff
 			if (send(new_fd, "Hello, world!", 13, 0) == -1)
 				perror("send");
 
-			close(new_fd);
-			close(pipe_fd[1]);
 			exit(0);
 		}
-		close(new_fd);  // parent doesn't need this
-        close(pipe_fd[1]);
-        int pid;
-        read(pipe_fd[0],&pid,sizeof(int));
-        //printf("pidddd : %d \n" ,pid);
-        add_pid(&c,pid);
 
+		close(new_fd);  // parent doesn't need this
+
+
+
+		n++;
 	}
 
 
-
-
-        close(pipe_fd[0]);
-     for(int i=0; i<c.len;i++){
-        printf("%d\n",c.pid[i]);
-        fflush(stdout);
+    for(int i = 0; i<n;i++){
+        close(fd[i][1]);
     }
 
-
+    for(int i = 0; i<n;i++){
+        int res;
+        read(fd[i][0],&res,sizeof(int));
+        printf("res : %d \n",res);
+    }
+    for (int i = 0; i < MAX_CLIENTS; i++)
+        close(fd[i][0]); 
 
 	return 0;
 }
