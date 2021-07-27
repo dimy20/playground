@@ -181,10 +181,8 @@ int main(void)
 				close(fd[j][1]);
 			}
 
-/*             int c_pid = getpid();
-            printf("new pid : %d \n", c_pid); */
 
-			send_to_parent(fd[n][1],n);
+			send_to_parent(fd[n][1],getpid());
 
 			//socket stuff
 			if (send(new_fd, "Hello, world!", 13, 0) == -1)
@@ -200,16 +198,17 @@ int main(void)
 		n++;
 	}
 
-
+	// close write end for all pipes
     for(int i = 0; i<n;i++){
         close(fd[i][1]);
     }
-
+	// read, do parent stuff
     for(int i = 0; i<n;i++){
         int res;
         read(fd[i][0],&res,sizeof(int));
         printf("res : %d \n",res);
     }
+	// finished; close read end of all pipes
     for (int i = 0; i < MAX_CLIENTS; i++)
         close(fd[i][0]); 
 
