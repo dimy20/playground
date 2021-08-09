@@ -36,8 +36,8 @@ char *get_string(char * buff, size_t buflen){
 int main(int argc, char ** argv){
     char buff[BUFF_SIZE];
     memset(buff,0,BUFF_SIZE);
-    int pid;
-
+    int pid,count;
+    char ** res = NULL;
     struct sigaction sa;
     memset(&sa,0,sizeof((sa)));
     sa.sa_handler = &signal_handler;
@@ -46,19 +46,10 @@ int main(int argc, char ** argv){
     if(sigaction(SIGCHLD,&sa,NULL) == -1){
         fprintf(stderr,"cant set sigaction to handle SIGCHLD signal: %d \n",errno);
     }
-
-    int count;
-
-    char ** res = NULL;
-
-
-
-
-
-
+    
     while(get_string(buff,BUFF_SIZE) != NULL){
         buff[strlen(buff) -1 ] = '\0';
-        res = split(buff,&count);
+        res = split(buff,&count," ");
 
         if((pid = fork()) == -1){
             fprintf(stderr,"Can't fork : %s \n",strerror(errno));

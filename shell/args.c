@@ -14,13 +14,13 @@ void split_free(char ** strings,int count){
     }
     free(strings);
 }
-char **split(char * buff,int * count){
+char **split(char * s,int * count, char * delim){
     int string_count = 0;
 
     char **res = NULL;
 
     // extract first word
-    char * token = strtok(buff," ");
+    char * token = strtok(s,delim);
 
     while(token != NULL){
             res = realloc(res, (string_count + 1) * sizeof(*res));
