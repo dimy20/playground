@@ -4,9 +4,21 @@
 
 #define STRLEN 256 // since this is just for args, this is enough
 
+int sum(int a, int b){
+    return a + b;
+}
+
+void split_free(char ** strings,int count){
+    for(int i = 0; i<count;i++) {
+        free(strings[i]);
+    }
+    free(strings);
+}
 char **split(char * buff,int * count){
     int string_count = 0;
-    char **res;
+
+    char **res = NULL;
+
     // extract first word
     char * token = strtok(buff," ");
   
@@ -22,35 +34,27 @@ char **split(char * buff,int * count){
     *count = string_count;
     return res;
 }
-void split_free(char ** strings,int count){
-    for(int i = 0; i<count;i++) {
-        free(strings[i]);
+
+char ** function(char * buff){
+    char ** sub_str;
+      sub_str = malloc(10 * sizeof(char*));
+    for (int i =0 ; i < 10; ++i)
+        sub_str[i] = malloc(20 * sizeof(char));
+    for (int i =0 ; i < 10; ++i){
+        strcpy(sub_str[i],buff);
     }
-    free(strings);
+    /* Fill the sub_str strings */
+    return sub_str;
 }
-void debug(char *s, int size){
-    printf("len : %ld \n", strlen(s));
-    printf("values :");
-    for(int i=0;i<size;i++){
-        printf("%d ",s[i]);
-    }
-        printf("\n");
-}
-void read_s(char * buff, int size){
-    printf("type : ");
-    fgets(buff,size,stdin);
-}
-int main(){
+
+/* int main(){
 
     int count;
     char buff[256]= "hello world\0";
     char **res = split(buff,&count);
-    split_free(res,count);
 
     for(int i = 0; i<count;i++){
         printf("%s ",res[i]);
     }  
-
-
     return 0;
-}
+} */

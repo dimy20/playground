@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include "args.h"
 
 #define BUFF_SIZE 256
 void debug_s(char *s, int size){
@@ -44,12 +45,29 @@ int main(int argc, char ** argv){
         fprintf(stderr,"cant set sigaction to handle SIGCHLD signal: %d \n",errno);
     }
 
+    int count;
+
+    char ** res = NULL;
+
+
+
+
+
+
+
     while(get_string(buff,BUFF_SIZE) != NULL){
         buff[strlen(buff) -1 ] = '\0';
+        res = split(buff,&count);
+
+
+/*         for(int i = 0; i<count;i++){
+            printf("%s ",res[i]);
+        }
+        printf("%d \n",count);
+ */
         if((pid = fork()) == -1){
             fprintf(stderr,"Can't fork : %s \n",strerror(errno));
         }
-            /* child process*/ 
         else if(pid == 0){
             if(execlp(buff,buff,"-a",(char *)0) == -1){
                 fprintf(stderr,"Can't execute command %s: %s \n",buff,strerror(errno));
@@ -57,6 +75,8 @@ int main(int argc, char ** argv){
             exit(EX_UNAVAILABLE);
         }
 
+        memset(buff,0,sizeof(buff));
+        split_free(res,count);
     }
 
     return 0;
