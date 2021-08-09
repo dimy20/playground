@@ -2,10 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define CHUNK 2
 #define STRLEN 256 // since this is just for args, this is enough
 
-int split(char * buff){
+char **split(char * buff,int * count){
     int string_count = 0;
     char **res;
     // extract first word
@@ -20,14 +19,14 @@ int split(char * buff){
         }  
 
 
-    for(int i = 0; i<string_count;i++){
-        printf("%s ",res[i]);
-    }  
-    for(int i = 0; i<string_count;i++) {
-        free(res[i]);
+    *count = string_count;
+    return res;
+}
+void split_free(char ** strings,int count){
+    for(int i = 0; i<count;i++) {
+        free(strings[i]);
     }
-    free(res);
-    return string_count;
+    free(strings);
 }
 void debug(char *s, int size){
     printf("len : %ld \n", strlen(s));
@@ -42,13 +41,15 @@ void read_s(char * buff, int size){
     fgets(buff,size,stdin);
 }
 int main(){
-/*     char buff[256];
-    memset(buff,0,sizeof(buff));
-    read_s(buff,sizeof(buff));
-    buff[strlen(buff)-1] = '\0'; */
-    char buff[256]= "hello world\0";
-    split(buff);
 
+    int count;
+    char buff[256]= "hello world\0";
+    char **res = split(buff,&count);
+    split_free(res,count);
+
+    for(int i = 0; i<count;i++){
+        printf("%s ",res[i]);
+    }  
 
 
     return 0;
