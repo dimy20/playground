@@ -1,6 +1,7 @@
 #ifndef ARGS
 #define ARGS
 
+#define TOO_MANY_ARGS -1 /* returned if MAX_ARGS was exceeded */
 
 #define MAX_ARGS 128
 /*Splits s into a individual strings using delim as the rule of 

@@ -44,10 +44,14 @@ int split_2(char *args[] , char * strings,const char * delim){
     char *token = strtok(strings,delim);
 
     while(token != NULL){
-        *next = token;
-        next++;
-        token = strtok(NULL,delim);
-        count++;
+        if(count < MAX_ARGS){
+            *next = token;
+            next++;
+            token = strtok(NULL,delim);
+            count++;
+        }else{
+            return TOO_MANY_ARGS;
+        }
     }
 
     *next = NULL;
