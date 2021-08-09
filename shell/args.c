@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "args.h"
 #define STRLEN 256 // since this is just for args, this is enough
 
 int sum(int a, int b){
@@ -37,18 +38,18 @@ char **split(char * s,int * count, char * delim){
     return res;
 }
 
-char ** function(char * buff){
-    /* Fill the sub_str strings */
+int split_2(char *args[] , char * strings,const char * delim){
+    int count = 0;
+    char ** next = args;
+    char *token = strtok(strings,delim);
+
+    while(token != NULL){
+        *next = token;
+        next++;
+        token = strtok(NULL,delim);
+        count++;
+    }
+
+    *next = NULL;
+    return count;
 }
-
-/* int main(){
-
-    int count;
-    char buff[256]= "hello world\0";
-    char **res = split(buff,&count);
-
-    for(int i = 0; i<count;i++){
-        printf("%s ",res[i]);
-    }  
-    return 0;
-} */
