@@ -21,7 +21,7 @@ char **split(char * buff,int * count){
 
     // extract first word
     char * token = strtok(buff," ");
-  
+
     while(token != NULL){
             res = realloc(res, (string_count + 1) * sizeof(*res));
             res[string_count] = malloc(STRLEN * sizeof(char));
@@ -29,22 +29,16 @@ char **split(char * buff,int * count){
             token = strtok(NULL," ");
             string_count++;
         }  
-
+    
+    res = realloc(res,(string_count +1 )*sizeof(*res));
+    res[string_count] = NULL;
 
     *count = string_count;
     return res;
 }
 
 char ** function(char * buff){
-    char ** sub_str;
-      sub_str = malloc(10 * sizeof(char*));
-    for (int i =0 ; i < 10; ++i)
-        sub_str[i] = malloc(20 * sizeof(char));
-    for (int i =0 ; i < 10; ++i){
-        strcpy(sub_str[i],buff);
-    }
     /* Fill the sub_str strings */
-    return sub_str;
 }
 
 /* int main(){

@@ -15,17 +15,19 @@ void debug_s(char *s, int size){
     for(int i = 0 ;i <size;i++){
         printf("%d ",s[i]);
     }
-    printf("\n");
+
 }
 void signal_handler(int s){
     (void)s; // shhh
     int errno_aux = errno;
     while(waitpid(-1,NULL,WNOHANG) > 0);
     errno = errno_aux;
+    printf("<$shell$> ");
+    fflush(stdout);
 }
 
 char *get_string(char * buff, size_t buflen){
-    printf("$$ ");
+    printf("<$shell$> ");
     return fgets(buff,buflen,stdin);
 }
 
@@ -54,26 +56,20 @@ int main(int argc, char ** argv){
 
 
 
-
     while(get_string(buff,BUFF_SIZE) != NULL){
         buff[strlen(buff) -1 ] = '\0';
         res = split(buff,&count);
 
-
-/*         for(int i = 0; i<count;i++){
-            printf("%s ",res[i]);
-        }
-        printf("%d \n",count);
- */
         if((pid = fork()) == -1){
             fprintf(stderr,"Can't fork : %s \n",strerror(errno));
         }
         else if(pid == 0){
-            if(execlp(buff,buff,"-a",(char *)0) == -1){
+            if(execvp(res[0],res) == -1){
                 fprintf(stderr,"Can't execute command %s: %s \n",buff,strerror(errno));
             }
             exit(EX_UNAVAILABLE);
         }
+
 
         memset(buff,0,sizeof(buff));
         split_free(res,count);
