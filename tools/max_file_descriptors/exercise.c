@@ -7,6 +7,9 @@
 #include <errno.h>
 
 #define SPACE 32
+
+#define ARG_FILENAME "-f"
+#define ARG_REPLACE "-r"
 void clear_file(char * filename){
     fclose(fopen(filename,"w"));
 }
@@ -123,8 +126,34 @@ int file_replace_word(char * filename, char * word, char * new_word){
     return count;
 
 }
-int main(){
-    printf("%d", file_replace_word("demo.txt","asdasdadasdasdasdasdasdasd","x"));
+int main(int argc, char ** argv){
+    char *filename;
+    char word[256];
+    char n_word[256];
+    if(argc < 2){
+        printf("Usage : file [args] \n");
+        return 0;
+    }
+    for(int i = 1 ; i< argc;i++){
+        if(strcmp(argv[i],ARG_FILENAME) == 0){
+            filename = argv[i+1];
+            i = i+1;
+        }else if(strcmp(argv[i],ARG_REPLACE) == 0){
+            if( argv[i+1] !=  NULL && argv[i+2] != NULL){
+                strcpy(word,argv[i+1]);
+                strcpy(n_word,argv[i+2]);
+                i += 2;
+            }else{
+                printf("Missing value for argument %s \n",ARG_REPLACE);
+                return 0;
+            }
+        }else{
+            printf("Invalid argument : %s \n",argv[i]);
+            return 0;
+        }
+    }
+
+    printf("%d", file_replace_word(filename,word,n_word));
     fflush(stdout);
     return 0;
 
