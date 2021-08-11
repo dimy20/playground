@@ -7,6 +7,8 @@
 #include <errno.h>
 
 #define SPACE 32
+#define MAX_BUFF 4096
+#define WORD_SIZE_MAX 128
 
 #define ARG_FILENAME "-f"
 #define ARG_REPLACE "-r"
@@ -53,6 +55,11 @@ void clear_file(char * filename){
 */
 
 // add a reverse version? a functionallity that basically undoes the last replacement
+typedef struct {
+    char buff[MAX_BUFF];
+    int len;
+} file_data_t;
+
 int file_replace_word(char * filename, char * word, char * new_word){
     int w_len= strlen(word);
     int nw_len = strlen(new_word);
@@ -60,6 +67,7 @@ int file_replace_word(char * filename, char * word, char * new_word){
     char word_buff[256];
     char test[256];
     char tmp_buffer[256];
+
 
     memset(word_buff,0,sizeof(word_buff));
     memset(tmp_buffer,0,sizeof(tmp_buffer));
@@ -74,7 +82,7 @@ int file_replace_word(char * filename, char * word, char * new_word){
                 // compare
                 /*12 123 2 12 31 2 32 12 [12 32] 12 12 X X X X X  */
                 if(strcmp(word_buff,word) == 0){
-                    // set the proper offset
+                    // offset where the replacement will be made 
                     off_t r_offset =  -1 * (strlen(word_buff) + 1);
                     //lseek(fd,offset,SEEK_CUR);
 
@@ -94,20 +102,14 @@ int file_replace_word(char * filename, char * word, char * new_word){
                     lseek(fd,r_offset,SEEK_CUR);
 
                     write(fd,new_word,nw_len);
-                    write(fd,tmp_buffer,sizeof(tmp_buffer));
-
+                    int b = write(fd,tmp_buffer,n);
+                    printf("here : %d \n",b);
 
                     lseek(fd,last_offset,SEEK_SET);
-                    // save offset 
-                    // add to temp buffer
-                    // go back to old offser
-
 
                     count++;
 
 
-/*                     read(fd,test,strlen(word_buff));
-                    printf("%s \n",test); */
                 }
                 memset(word_buff,0,sizeof(word_buff));
                 /*set i to zero so it adds new values by offset 0, 
@@ -124,37 +126,62 @@ int file_replace_word(char * filename, char * word, char * new_word){
     }
 
     return count;
+}
+int read_file(char * filename, char * buff, size_t size){
+    int fd, n_read, total_read;
+    total_read = 0;
+    char *p = buff;
+    if((fd = open(filename,O_RDONLY)) == -1){
+        return -1;
+    }
+    // read into buffer
+    while((n_read = read(fd,p + total_read, size - total_read)) > 0){
+        total_read += n_read;
+    };
+
+    (void)close(fd);
+    return ((n_read < 0) ? n_read : total_read);        
 
 }
-int main(int argc, char ** argv){
-    char *filename;
-    char word[256];
-    char n_word[256];
-    if(argc < 2){
-        printf("Usage : file [args] \n");
-        return 0;
-    }
-    for(int i = 1 ; i< argc;i++){
-        if(strcmp(argv[i],ARG_FILENAME) == 0){
-            filename = argv[i+1];
-            i = i+1;
-        }else if(strcmp(argv[i],ARG_REPLACE) == 0){
-            if( argv[i+1] !=  NULL && argv[i+2] != NULL){
-                strcpy(word,argv[i+1]);
-                strcpy(n_word,argv[i+2]);
-                i += 2;
-            }else{
-                printf("Missing value for argument %s \n",ARG_REPLACE);
-                return 0;
-            }
-        }else{
-            printf("Invalid argument : %s \n",argv[i]);
-            return 0;
-        }
-    }
 
-    printf("%d", file_replace_word(filename,word,n_word));
-    fflush(stdout);
+void file_replace_word2(char * src, int size, char * word){
+    char word_placeholder[WORD_SIZE_MAX];
+    char * temp_buffer = NULL;
+    char res[MAX_BUFF];
+
+    int j = 0;
+    unsigned int r_offset = 0;
+    for(int i = 0; i<size;i++){
+        if(src[i] != (char)SPACE && src [i] != '\0'){
+                word_placeholder[j++] = src[i];
+        }else{
+            if(strcmp(word_placeholder,word) == 0){
+                    r_offset =  i - strlen(word_placeholder);
+                    printf("offset : %d ",r_offset);
+                    printf("i : %d ",i);
+                    temp_buffer = src + i;
+
+                printf("%s \n",word_placeholder);
+                printf("temp buffer : %s \n",temp_buffer);
+                break;
+            }
+            memset(word_placeholder,0,sizeof(word_placeholder));
+            j = 0;
+        }
+
+}
+}
+int main(int argc, char ** argv){
+    char buff[MAX_BUFF];
+    memset(buff,0,MAX_BUFF);
+    char * filename = argv[1];
+    if(read_file(filename,buff,MAX_BUFF) == -1){
+        fprintf(stderr,"Error on file : '%s', error : %s (errno : %d) \n",filename,strerror(errno),errno);
+        return 1;
+    };
+
+    file_replace_word2(buff,strlen(buff),"teta");
+
     return 0;
 
 }
