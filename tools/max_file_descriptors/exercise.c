@@ -76,7 +76,8 @@ int read_file(char * filename, char * buff, size_t size){
 void buff_replace_word(char * src, int size, char * word, char * new_word){
     char word_placeholder[WORD_SIZE_MAX];
     char temp_buffer[256];
-    char res[MAX_BUFF];
+
+    unsigned int len_new_word = strlen(new_word);
 
     int j = 0;
     unsigned int r_offset = 0;
@@ -85,7 +86,6 @@ void buff_replace_word(char * src, int size, char * word, char * new_word){
                 word_placeholder[j++] = src[i];
         }else{
             if(strcmp(word_placeholder,word) == 0){
-                    //printf("%s \n",src);
                     // store offset for the new world (current position - word length)
                     r_offset =  i - strlen(word_placeholder);
                     // save the adjacent data, that is from our current position on the buffer onwards
@@ -99,17 +99,16 @@ void buff_replace_word(char * src, int size, char * word, char * new_word){
                     // concat adjacent data
                     strncat(src,temp_buffer,sizeof(temp_buffer));
 
-                    //printf("%s \n",src);
-
                     //clear temp_buffer for next iteration
-                    memset(temp_buffer,0,sizeof(temp_buffer));
+                    memset(temp_buffer,0,strlen(temp_buffer));
             }
             memset(word_placeholder,0,sizeof(word_placeholder));
             j = 0;
         }
+    }
+    src[strlen(src) - 1] = '\0';
+}
 
-}
-}
 int main(int argc, char ** argv){
     char buff[MAX_BUFF];
     memset(buff,0,MAX_BUFF);
@@ -120,8 +119,13 @@ int main(int argc, char ** argv){
     };
 
     buff_replace_word(buff,strlen(buff),"test","computer_word");
-
     printf("%s \n",buff);
+
+/*     for(int i = 0; i<strlen(buff);i++){
+        printf("%d ",buff[i]);
+    }
+        printf("\n");
+    printf("%s \n",buff); */
     return 0;
 
 }
