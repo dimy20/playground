@@ -7,6 +7,8 @@
 #include <sysexits.h>
 #include <unistd.h>
 #include <signal.h>
+#include <limits.h>
+
 
 #include "args.h"
 
@@ -34,8 +36,9 @@ char *get_string(char * buff, size_t buflen){
 
 
 int main(int argc, char ** argv){
+    char *args[MAX_ARGS];
     const char * delim = " ";
-    char buff[BUFF_SIZE];
+    char buff[BUFF_SIZE], cwd[PATH_MAX];
     memset(buff,0,BUFF_SIZE);
     int pid,count;
 
@@ -50,9 +53,12 @@ int main(int argc, char ** argv){
         fprintf(stderr,"cant set sigaction to handle SIGCHLD signal: %d \n",errno);
     }
 
-    char *args[MAX_ARGS];
 
+
+/*     getcwd(cwd,sizeof(cwd));
+    fprintf(stdout, "%s - ",cwd); */
     while(get_string(buff,BUFF_SIZE) != NULL){
+
         buff[strlen(buff) -1 ] = '\0';
         if(split_2(args,buff,delim) == -1){
             printf("Too many arguments \n");
@@ -68,6 +74,8 @@ int main(int argc, char ** argv){
             }
             memset(buff,0,sizeof(buff));
         }
+/*         fprintf(stdout, "%s - ",cwd);
+        fflush(stdout); */
     }
 
     return 0;

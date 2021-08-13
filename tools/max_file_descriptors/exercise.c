@@ -201,7 +201,8 @@ int main(int argc, char ** argv){
     */
     strcpy(write_buff,read_buff);
 
-    if(buff_replace_word(write_buff,strlen(write_buff),word,new_word) == 0){
+    if(buff_replace_word(write_buff,strlen(write_buff),"computer_word","a") == 0){
+
         printf("could not find '%s' on the file, '%s' not modified.",word,filename);
         return 0;
     }
